@@ -4,5 +4,8 @@ python-dotenv==1.1.0
 langgraph==0.4.1
 langchain-core==0.3.62
 langchain-anthropic==0.3.14
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+sse-starlette==2.2.1
 pytest==8.3.5
 pytest-asyncio==0.25.0
