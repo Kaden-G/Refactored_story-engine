@@ -648,3 +648,21 @@ class MamsDAL:
             sql = "SELECT * FROM conflict WHERE resolved_at IS NULL ORDER BY detected_at"
             params = ()
         return [Conflict(**r) for r in self._fetchall(sql, params)]
+
+    def get_agent_character_mapping(
+        self, agent_id: int,
+    ) -> AgentCharacter | None:
+        """Get the active agent_character row for an agent (if any)."""
+        row = self._fetchone(
+            "SELECT * FROM agent_character "
+            "WHERE agent_id = %s AND unassigned_at IS NULL",
+            (agent_id,),
+        )
+        return AgentCharacter(**row) if row else None
+
+    def get_character_for_agent(self, agent_id: int) -> Character | None:
+        """Convenience: return the Character an agent portrays, or None."""
+        mapping = self.get_agent_character_mapping(agent_id)
+        if mapping is None:
+            return None
+        return self.get_character(mapping.character_id)
