@@ -17,6 +17,7 @@ from psycopg_pool import ConnectionPool
 from story_engine.dal.models import (
     Agent,
     AgentBeliefResult,
+    AgentCharacter,
     AgentSession,
     Belief,
     BeliefDivergence,
