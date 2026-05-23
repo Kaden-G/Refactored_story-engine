@@ -29,7 +29,7 @@ export interface Agent {
 export interface Location {
   location_id: number;
   name: string;
-  description: string | null;
+  location_type: string;
   parent_location_id: number | null;
   world_id: number;
 }

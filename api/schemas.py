@@ -23,7 +23,7 @@ class CharacterOut(BaseModel):
 class LocationOut(BaseModel):
     location_id: int
     name: str
-    description: str | None = None
+    location_type: str
     parent_location_id: int | None = None
     world_id: int
 

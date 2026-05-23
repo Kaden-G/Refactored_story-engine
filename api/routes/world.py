@@ -81,7 +81,7 @@ def list_locations(world_id: int, request: Request):
         LocationOut(
             location_id=loc.location_id,
             name=loc.name,
-            description=loc.description,
+            location_type=loc.location_type,
             parent_location_id=loc.parent_location_id,
             world_id=loc.world_id,
         )

@@ -41,8 +41,10 @@ psql -d mams -v ON_ERROR_STOP=1 -f 00_run_all.sql
 
 ### 2. Install Python dependencies
 ```bash
-pip install -e ".[dev]"
+pip install -e ".[dev,api]"
 ```
+The `api` extra installs FastAPI + uvicorn + sse-starlette for the
+REST/SSE backend; omit it if you only need the CLI runner and tests.
 
 ### 3. Configure environment
 ```bash

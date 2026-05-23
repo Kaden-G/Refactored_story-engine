@@ -489,6 +489,13 @@ class MamsDAL:
 
     # ── Lookup / entity reads ────────────────────────────────────────
 
+    def get_worlds(self) -> list[World]:
+        """Return every world in the database, oldest first."""
+        return [
+            World(**r)
+            for r in self._fetchall("SELECT * FROM world ORDER BY world_id")
+        ]
+
     def get_world(self, world_id: int) -> World | None:
         row = self._fetchone(
             "SELECT * FROM world WHERE world_id = %s", (world_id,)

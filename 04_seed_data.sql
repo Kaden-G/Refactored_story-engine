@@ -299,12 +299,12 @@ BEGIN
 
   -- ==========================================================
   -- KNOWLEDGE_EVENT  (who learned about the map split, and how)
-  -- Varen learned it directly (Sylara reported from Markarth).
+  -- Varen was at Greywatch when it happened, so Sylara TOLD him.
   -- Ondolemar was in Markarth too, but only caught partial intel.
   -- Lydia has NOT learned it yet — she is at Greywatch.
   -- ==========================================================
   INSERT INTO knowledge_event (agent_id, event_id, learned_via) VALUES
-    (a_varen,     e_mapsplit, 'direct'),
+    (a_varen,     e_mapsplit, 'told'),
     (a_ondolemar, e_mapsplit, 'inferred'),
     (a_varen,     e_helgen,   'direct'),
     (a_varen,     e_doorone,  'direct'),
