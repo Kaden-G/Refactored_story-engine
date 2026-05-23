@@ -5,6 +5,11 @@ __pycache__/
 dist/
 build/
 .pytest_cache/
+.venv/
+
+# Claude Code — personal/local only
+CLAUDE.local.md
+.claude/settings.local.json
 
 # Frontend
 frontend/node_modules/

@@ -10,7 +10,7 @@ import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
@@ -59,5 +59,11 @@ app.include_router(sessions_router, prefix="/api/sessions", tags=["sessions"])
 
 
 @app.get("/api/health")
-def health():
-    return {"status": "ok"}
+def health(request: Request):
+    """Liveness + DB reachability check."""
+    dal = request.app.state.dal
+    try:
+        db_ok = dal.ping()
+    except Exception as exc:  # pragma: no cover — depends on DB env
+        return {"status": "degraded", "db": "unreachable", "error": str(exc)}
+    return {"status": "ok" if db_ok else "degraded", "db": "ok" if db_ok else "down"}

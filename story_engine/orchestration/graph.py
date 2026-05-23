@@ -39,7 +39,12 @@ from story_engine.orchestration.state import StoryState
 
 
 def _route_agent(state: StoryState) -> str:
-    """After director_plan, route to the appropriate agent node."""
+    """After director_plan, route to the appropriate agent node.
+
+    Dispatches on AgentContext.agent_type (real MAMS label):
+    NPC -> npc_act, Specialist -> lorekeeper_act (only Lore-keeper
+    is implemented today; Writer is a virtual node with no agent row).
+    """
     if state.get("error"):
         return "close_session"
     if state.get("should_end", False):
@@ -49,25 +54,24 @@ def _route_agent(state: StoryState) -> str:
     contexts = state.get("agent_contexts", {})
     plan = state.get("current_plan", "").lower()
 
-    # If Director explicitly named "writer" or it's a scene-setting turn
+    # Virtual node: the Writer is not a MAMS agent; the Director
+    # may still name "writer" to request narrative prose.
     if "writer" in plan:
         return "writer_act"
 
-    # If there's an active agent, check its type
+    # Dispatch on the resolved agent's type.
     if active_id and active_id in contexts:
         ctx = contexts[active_id]
-        if "lore" in ctx.agent_name.lower():
+        if ctx.agent_type == "Specialist":
             return "lorekeeper_act"
-        if ctx.character_id is not None:
+        if ctx.agent_type == "NPC":
             return "npc_act"
 
-    # Fallback: if plan mentions lore/conflict, route to lore-keeper
+    # Plan mentions conflict/lore but no active agent — still route to LK
     if "conflict" in plan or "lore" in plan:
         return "lorekeeper_act"
 
-    # Default: writer for narrative, or npc if an agent is selected
-    if active_id:
-        return "npc_act"
+    # Default: writer for narrative narration.
     return "writer_act"
 
 

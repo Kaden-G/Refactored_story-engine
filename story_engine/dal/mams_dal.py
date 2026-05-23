@@ -17,7 +17,9 @@ from psycopg_pool import ConnectionPool
 from story_engine.dal.models import (
     Agent,
     AgentBeliefResult,
+    AgentCharacter,
     AgentSession,
+    AgentType,
     Belief,
     BeliefDivergence,
     Character,
@@ -312,8 +314,12 @@ class MamsDAL:
         """Query 2: all unresolved conflicts with agent names and belief text."""
         rows = self._fetchall(
             "SELECT c.conflict_id, "
-            "       a1.name AS agent_1, b1.belief_content AS belief_1, "
-            "       a2.name AS agent_2, b2.belief_content AS belief_2, "
+            "       a1.name AS agent_1, a1.agent_id AS agent_id_1, "
+            "       b1.belief_id AS belief_id_1, "
+            "       b1.belief_content AS belief_1, "
+            "       a2.name AS agent_2, a2.agent_id AS agent_id_2, "
+            "       b2.belief_id AS belief_id_2, "
+            "       b2.belief_content AS belief_2, "
             "       c.detected_at "
             "  FROM conflict c "
             "  JOIN belief b1 ON c.belief_id_1 = b1.belief_id "
@@ -489,6 +495,13 @@ class MamsDAL:
 
     # ── Lookup / entity reads ────────────────────────────────────────
 
+    def get_worlds(self) -> list[World]:
+        """Return every world in the database, oldest first."""
+        return [
+            World(**r)
+            for r in self._fetchall("SELECT * FROM world ORDER BY world_id")
+        ]
+
     def get_world(self, world_id: int) -> World | None:
         row = self._fetchone(
             "SELECT * FROM world WHERE world_id = %s", (world_id,)
@@ -592,6 +605,25 @@ class MamsDAL:
             EventType(**r)
             for r in self._fetchall("SELECT * FROM event_type ORDER BY label")
         ]
+
+    def get_event_type_by_label(self, label: str) -> EventType | None:
+        """Look up an event_type by its label (e.g. 'dialogue', 'decision')."""
+        row = self._fetchone(
+            "SELECT * FROM event_type WHERE label = %s", (label,)
+        )
+        return EventType(**row) if row else None
+
+    def get_agent_type(self, agent_type_id: int) -> AgentType | None:
+        row = self._fetchone(
+            "SELECT * FROM agent_type WHERE agent_type_id = %s",
+            (agent_type_id,),
+        )
+        return AgentType(**row) if row else None
+
+    def ping(self) -> bool:
+        """Verify the database is reachable. Returns True on success."""
+        row = self._fetchone("SELECT 1 AS ok")
+        return bool(row and row.get("ok") == 1)
 
     def get_relationship_types(self) -> list[RelationshipType]:
         return [
