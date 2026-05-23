@@ -14,7 +14,6 @@ can prove the round-trip works end-to-end.
 
 from __future__ import annotations
 
-import os
 import sys
 
 from dotenv import load_dotenv
@@ -22,7 +21,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from story_engine.dal import MamsDAL, get_pool, close_pool
-from story_engine.orchestration import build_director_graph
+from story_engine.orchestration import build_director_graph, build_llm
 
 
 def main() -> None:
@@ -40,12 +39,9 @@ def main() -> None:
         print("ERROR: Director Agent not found.")
         sys.exit(1)
 
-    # Optionally wire up an LLM
-    llm = None
-    api_key = os.getenv("ANTHROPIC_API_KEY")
-    if api_key:
-        from langchain_anthropic import ChatAnthropic
-        llm = ChatAnthropic(model="claude-sonnet-4-20250514", api_key=api_key)
+    # Optionally wire up an LLM (model id from STORY_ENGINE_MODEL).
+    llm = build_llm()
+    if llm is not None:
         print("Using Claude as Director LLM.")
     else:
         print("No ANTHROPIC_API_KEY — using rule-based Director fallback.")

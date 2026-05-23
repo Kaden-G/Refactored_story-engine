@@ -218,11 +218,19 @@ class AgentBeliefResult:
 
 @dataclass(frozen=True, slots=True)
 class UnresolvedConflict:
-    """Query 2: unresolved conflicts with agent names and belief text."""
+    """Query 2: unresolved conflicts with agent names and belief text.
+
+    Includes the underlying belief and agent ids so the orchestration
+    layer can call resolve_conflict() without re-querying.
+    """
     conflict_id: int
     agent_1: str
+    agent_id_1: int
+    belief_id_1: int
     belief_1: str
     agent_2: str
+    agent_id_2: int
+    belief_id_2: int
     belief_2: str
     detected_at: datetime
 

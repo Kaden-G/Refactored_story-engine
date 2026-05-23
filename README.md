@@ -63,7 +63,26 @@ python run_session.py
 ```
 Without an `ANTHROPIC_API_KEY`, all agents use rule-based fallbacks —
 useful for proving the full round-trip works. With a key, agents use
-Claude for generation.
+Claude for generation. The model id can be overridden via
+`STORY_ENGINE_MODEL`.
+
+### 6. Run the API server (optional)
+```bash
+uvicorn api.main:app --reload --port 8000
+```
+The backend exposes REST endpoints under `/api/world/*` and
+`/api/sessions/*`, plus an SSE stream at
+`/api/sessions/{id}/stream`. CORS is open to `localhost:3000` by
+default; set `FRONTEND_ORIGIN` to add another origin.
+
+### 7. Run the Next.js frontend (optional)
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Open <http://localhost:3000>. Set `NEXT_PUBLIC_API_URL` if your API
+isn't on `localhost:8000`.
 
 ### Reset the database
 ```bash
@@ -96,11 +115,22 @@ psql -d mams -v ON_ERROR_STOP=1 -f 00_run_all.sql
 │       ├── state.py                StoryState TypedDict + AgentContext
 │       ├── prompts.py              System prompts for all agent roles
 │       ├── nodes.py                Node factories (8 nodes)
+│       ├── llm.py                  Centralized ChatAnthropic builder (env-driven)
 │       └── graph.py                build_director_graph() — compiles the StateGraph
+│
+├── api/                            FastAPI backend (REST + SSE)
+│   ├── main.py                     App + lifespan-managed DB pool
+│   ├── schemas.py                  Pydantic response/request models
+│   └── routes/                     /api/world/* and /api/sessions/*
+│
+├── frontend/                       Next.js 15 + React 19 dashboard
+│   └── src/{app,components,lib}
 │
 ├── tests/
 │   ├── conftest.py                 Session-scoped fixtures for Greywatch
-│   └── test_dal.py                 ~25 test cases against seed data
+│   ├── test_dal.py                 DAL tests against seed data
+│   ├── test_orchestration.py       LangGraph node + end-to-end graph tests
+│   └── test_api.py                 FastAPI TestClient smoke tests
 │
 ├── run_session.py                  CLI entry point for a full session
 ├── pyproject.toml                  Package config (story-engine 2.0.0a1)
@@ -189,8 +219,12 @@ A `session` = one complete Director loop.
 - [x] Python data-access layer (MamsDAL, ~45 methods)
 - [x] LangGraph orchestration (Director loop, 8 nodes, agent routing)
 - [x] Agent prompts (Director, Writer, Lore-keeper, NPC)
-- [x] Test suite (~25 tests against Greywatch seed data)
-- [ ] Live testing with PostgreSQL + Claude
+- [x] Durable round-trip: NPC/Writer emit pending events, process_events
+      persists them, Lore-keeper actually calls resolve_conflict
+- [x] FastAPI REST + SSE backend
+- [x] Next.js 15 frontend
+- [x] Test suite: DAL + orchestration + API smoke (~50 tests)
+- [ ] Live testing with PostgreSQL + Claude end-to-end
 - [ ] Augment Greywatch with live story content
 
 ---

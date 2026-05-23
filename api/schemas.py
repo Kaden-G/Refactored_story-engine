@@ -49,17 +49,17 @@ class SessionOut(BaseModel):
     turn_number: int
     narrative_context: str = ""
 
+class MessageOut(BaseModel):
+    role: str
+    agent_name: str | None = None
+    content: str
+
 class TurnResult(BaseModel):
     turn_number: int
     messages: list[MessageOut]
     should_end: bool
     unresolved_conflicts: int = 0
     active_agent: str | None = None
-
-class MessageOut(BaseModel):
-    role: str
-    agent_name: str | None = None
-    content: str
 
 
 # ── Agent context (for state inspector) ─────────────────────────────
